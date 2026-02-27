@@ -17,5 +17,8 @@
 
 
 
- *OUT PUT OF WEEK 2: 
+ *OUT PUT OF TASK 2: 
  ![Image](https://github.com/user-attachments/assets/5489b085-628a-4e81-a99d-7c6155914ca7)
+
+*OUT PUT OF TASK 3:
+![Image](https://github.com/user-attachments/assets/45cb1bb1-dabe-4e4b-8d87-1f5c56590a40)
