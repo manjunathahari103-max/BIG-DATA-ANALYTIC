@@ -1,0 +1,57 @@
+import pandas as pd
+import plotly.express as px
+from dash import Dash, dcc, html, Input, Output
+
+# Load dataset
+df = pd.read_csv("sales_data.csv")
+
+# Initialize app
+app = Dash(__name__)
+
+# Layout of dashboard
+app.layout = html.Div([
+    html.H1("Sales Analysis Dashboard", style={'textAlign': 'center'}),
+
+    # Dropdown filter
+    dcc.Dropdown(
+        id='region_filter',
+        options=[{'label': i, 'value': i} for i in df['Region'].unique()],
+        value='North',
+        clearable=False
+    ),
+
+    # Graphs
+    dcc.Graph(id='sales_bar_chart'),
+    dcc.Graph(id='profit_line_chart'),
+    dcc.Graph(id='product_pie_chart')
+])
+
+# Callback for interactivity
+@app.callback(
+    [Output('sales_bar_chart', 'figure'),
+     Output('profit_line_chart', 'figure'),
+     Output('product_pie_chart', 'figure')],
+    [Input('region_filter', 'value')]
+)
+def update_dashboard(selected_region):
+    filtered_df = df[df['Region'] == selected_region]
+
+    # Bar chart: Sales by product
+    bar_chart = px.bar(filtered_df, x='Product', y='Sales',
+                       title=f"Sales by Product in {selected_region}",
+                       color='Product')
+
+    # Line chart: Profit over time
+    line_chart = px.line(filtered_df, x='Date', y='Profit',
+                         title=f"Profit Trend in {selected_region}",
+                         markers=True)
+
+    # Pie chart: Product distribution
+    pie_chart = px.pie(filtered_df, names='Product', values='Sales',
+                       title=f"Product Share in {selected_region}")
+
+    return bar_chart, line_chart, pie_chart
+
+# Run server
+if __name__ == '__main__':
+    app.run(debug=True)
