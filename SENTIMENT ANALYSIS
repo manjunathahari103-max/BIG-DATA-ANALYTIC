@@ -1,0 +1,60 @@
+import pandas as pd
+import numpy as np
+import re
+import nltk
+
+from sklearn.model_selection import train_test_split
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
+
+nltk.download('stopwords')
+from nltk.corpus import stopwords
+
+df = pd.read_csv("reviews.csv")
+
+print("Dataset Preview:")
+print(df.head())
+
+stop_words = set(stopwords.words('english'))
+
+def clean_text(text):
+    text = text.lower()                     
+    text = re.sub(r'[^a-z\s]', '',
+    words = text.split()
+    words = [w for w in words if w not in stop_words]  
+    return " ".join(words)
+
+df['Clean_Review'] = df['Review'].apply(clean_text)
+
+print("\nCleaned Text:")
+print(df[['Review','Clean_Review']].head())
+
+df['Sentiment'] = df['Sentiment'].map({'Positive':1, 'Negative':0})
+
+vectorizer = TfidfVectorizer()
+X = vectorizer.fit_transform(df['Clean_Review'])
+y = df['Sentiment']
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42
+)
+
+model = LogisticRegression()
+model.fit(X_train, y_train)
+
+y_pred = model.predict(X_test)
+
+print("\nModel Accuracy:", accuracy_score(y_test, y_pred))
+print("\nClassification Report:\n", classification_report(y_test, y_pred))
+print("\nConfusion Matrix:\n", confusion_matrix(y_test, y_pred))
+
+def predict_sentiment(text):
+    cleaned = clean_text(text)
+    vector = vectorizer.transform([cleaned])
+    pred = model.predict(vector)[0]
+    return "Positive 😊" if pred==1 else "Negative 😞"
+
+print("\nCustom Predictions:")
+print(predict_sentiment("This product is very good and I like it"))
+print(predict_sentiment("This is the worst thing I bought"))
